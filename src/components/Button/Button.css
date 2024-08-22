@@ -1,0 +1,39 @@
+button {
+  width: 60px;
+  height: 60px;
+  font-size: 24px;
+  background-color: #f1f1f1;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button:hover {
+  background-color: #e0e0e0;
+}
+
+button:active {
+  background-color: #ccc;
+}
+
+button.operator {
+  background-color: #f9a825;
+  color: white;
+}
+
+button.operator:hover {
+  background-color: #f57f17;
+}
+
+button.zero {
+  width: 120px;
+  height: 60px;
+  border-radius: 30px;
+  display: flex;
+  justify-content: flex-start;
+  padding-left: 20px;
+}
