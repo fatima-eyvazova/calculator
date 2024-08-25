@@ -1,6 +1,6 @@
 import Button from "../../components/Button/Button";
-import { FaTimes, FaMinus, FaPlus } from "react-icons/fa";
-import { FaDivide } from "react-icons/fa6";
+// import { FaTimes, FaMinus, FaPlus } from "react-icons/fa";
+// import { FaDivide } from "react-icons/fa6";
 
 import "./Calculator.css";
 import { useEffect, useState } from "react";
@@ -31,7 +31,7 @@ const Calculator = () => {
   };
 
   useEffect(() => {
-    setInput(curState || preState || "0");
+    setInput(curState || preState || null);
   }, [curState, preState]);
 
   const operatorType = (e) => {
@@ -64,8 +64,24 @@ const Calculator = () => {
 
     let cal;
     switch (operator) {
+      case "/":
+        cal = String(parseFloat(preState) / parseFloat(curState));
+
+        break;
+
+      case "+":
+        cal = String(parseFloat(preState) + parseFloat(curState));
+        break;
       case "*":
         cal = String(parseFloat(preState) * parseFloat(curState));
+
+        break;
+      case "-":
+        cal = String(parseFloat(preState) - parseFloat(curState));
+
+        break;
+      default:
+        return;
     }
 
     setInput("");
@@ -115,7 +131,7 @@ const Calculator = () => {
                 C
               </Button>
               <Button onClick={operatorType} className="button">
-                <FaDivide />
+                {/* <FaDivide /> */} /
               </Button>
               <Button onClick={percentCalculate}>%</Button>
               <Button onClick={minusPlus} className="operator">
@@ -135,7 +151,7 @@ const Calculator = () => {
               <Button onClick={inputNumber}>5</Button>
               <Button onClick={inputNumber}>6</Button>
               <Button onClick={operatorType} className="operator">
-                <FaMinus />
+                {/* <FaMinus /> */} -
               </Button>
             </div>
             <div className="number-row">
@@ -143,7 +159,7 @@ const Calculator = () => {
               <Button onClick={inputNumber}>2</Button>
               <Button onClick={inputNumber}>3</Button>
               <Button onClick={operatorType} className="operator">
-                <FaPlus />
+                {/* <FaPlus /> */} +
               </Button>
             </div>
             <div className="last-row">
