@@ -9,6 +9,7 @@ body {
 
 .calculator-container {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   background-color: #ffffff;
@@ -32,21 +33,53 @@ body {
   font-size: 32px;
   text-align: right;
   border-radius: 5px;
+  margin-bottom: 10px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .buttons {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  width: 100%;
 }
 
 button {
-  margin-right: 10px;
+  border: none;
+  background-color: #e0e0e0;
+  color: #333;
+  font-size: 18px;
+  padding: 20px;
+  margin: 5px;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
+
+button.operator {
+  background-color: #f9a825;
+  color: #fff;
+}
+
+button.operator:hover {
+  background-color: #f57f17;
+}
+
+button:hover {
+  background-color: #bdbdbd;
+}
+
 .top-row,
 .number-row,
 .last-row {
   display: flex;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
+  justify-content: center;
+}
+
+.last-row {
+  margin-top: 10px;
 }
