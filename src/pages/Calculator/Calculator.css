@@ -20,6 +20,7 @@ body {
 }
 
 .title {
+  font-family: Georgia, "Times New Roman", Times, serif;
   text-align: center;
   font-size: 24px;
   margin-bottom: 20px;
@@ -27,6 +28,7 @@ body {
 }
 
 .display {
+  overflow: hidden;
   background-color: #333;
   color: #fff;
   padding: 20px;

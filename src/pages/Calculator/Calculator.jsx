@@ -1,177 +1,205 @@
 import Button from "../../components/Button/Button";
-// import { FaTimes, FaMinus, FaPlus } from "react-icons/fa";
-// import { FaDivide } from "react-icons/fa6";
-
-import "./Calculator.css";
+import "../Calculator/Calculator.css";
 import { useEffect, useState } from "react";
+import History from "../../components/History/History";
 
 const Calculator = () => {
-  const [preState, setPreState] = useState("");
-  const [curState, setCurState] = useState("");
+  const [expression, setExpression] = useState("");
   const [input, setInput] = useState("0");
-  const [operator, setOperator] = useState(null);
   const [total, setTotal] = useState(false);
+  const [history, setHistory] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
 
   const formatNumber = (value) => {
-    if (isNaN(value) || value === "") return "0";
-    return Number(value);
+    if (isNaN(value) || value === "") return value;
+    return Number(value).toString();
   };
 
   const inputNumber = (e) => {
     if (total) {
-      setPreState("");
-      setCurState("");
+      setExpression(e.target.innerText);
       setTotal(false);
+    } else {
+      const value = e.target.innerText;
+      setExpression((prev) => prev + value);
     }
-
-    const value = e.target.innerText;
-    if (value === "." && curState.includes(".")) return;
-
-    setCurState((prev) => prev + value);
   };
 
   useEffect(() => {
-    setInput(curState || preState || null);
-  }, [curState, preState]);
+    setInput(expression || "0");
+  }, [expression]);
 
   const operatorType = (e) => {
     e.stopPropagation();
     const value = e.target.innerText;
-    console.log("e", e);
 
-    if (curState === "" && value === "-") {
-      setCurState("-");
+    if (expression === "" && value === "-") {
+      setExpression("-");
       return;
     }
 
-    if (curState === "" && value !== "-" && value !== ".") return;
+    if (expression === "" && value !== "-" && value !== ".") return;
 
-    if (preState !== "" && curState !== "") {
-      calculation();
+    if (["+", "-", "*", "/"].includes(expression.slice(-1))) {
+      setExpression(expression.slice(0, -1) + value);
+    } else {
+      setExpression((prev) => prev + value);
     }
 
-    setOperator(value);
-    setPreState(curState);
-    setCurState("");
-    setInput(input + value);
+    setInput(expression + value);
   };
 
-  const calculation = (e) => {
-    if (e?.target.innerText === "=") {
+  const calculation = () => {
+    try {
+      const result = evaluateExpression(expression);
+      if (result === "Error") {
+        throw new Error("Invalid expression");
+      }
+      setInput(result);
+      setExpression(result.toString());
+      setHistory((prev) => [...prev, `${expression} = ${result}`]);
       setTotal(true);
+    } catch (error) {
+      setInput("Error");
+      setExpression("");
     }
-    console.log("operator", operator);
+  };
 
-    let cal;
-    switch (operator) {
-      case "/":
-        cal = String(parseFloat(preState) / parseFloat(curState));
+  const evaluateExpression = (expr) => {
+    try {
+      if (expr.includes("/0")) {
+        throw new Error("Division by zero error");
+      }
 
-        break;
+      let updatedExpr = expr;
+      while (updatedExpr.includes("√")) {
+        const sqrtIndex = updatedExpr.indexOf("√");
+        let number = "";
+        let i = sqrtIndex + 1;
 
-      case "+":
-        cal = String(parseFloat(preState) + parseFloat(curState));
-        break;
-      case "*":
-        cal = String(parseFloat(preState) * parseFloat(curState));
+        while (
+          i < updatedExpr.length &&
+          !isNaN(updatedExpr[i]) &&
+          updatedExpr[i] !== " " &&
+          updatedExpr[i] !== "+" &&
+          updatedExpr[i] !== "-" &&
+          updatedExpr[i] !== "*" &&
+          updatedExpr[i] !== "/"
+        ) {
+          number += updatedExpr[i];
+          i++;
+        }
 
-        break;
-      case "-":
-        cal = String(parseFloat(preState) - parseFloat(curState));
+        const sqrtResult = Math.sqrt(parseFloat(number));
+        updatedExpr =
+          updatedExpr.slice(0, sqrtIndex) +
+          sqrtResult +
+          updatedExpr.slice(sqrtIndex + number.length + 1);
+      }
 
-        break;
-      default:
-        return;
+      return Function(`return ${updatedExpr}`)();
+    } catch (error) {
+      return "Error";
     }
+  };
 
-    setInput("");
-    setPreState(cal);
-    setCurState("");
+  const calculateSquare = () => {
+    setExpression((prev) => prev + "√");
   };
 
   const minusPlus = () => {
-    setCurState((prev) =>
+    setExpression((prev) =>
       prev.charAt(0) === "-" ? prev.substring(1) : "-" + prev
     );
   };
 
   const percentCalculate = () => {
-    const value = parseFloat(curState);
-    if (preState) {
-      setCurState(String((value / 100) * parseFloat(preState)));
-    } else {
-      setCurState(String(value / 100));
+    const value = parseFloat(expression);
+    if (!isNaN(value)) {
+      setExpression(String(value / 100));
     }
   };
 
   const resetSettings = () => {
-    setPreState("");
-    setCurState("");
+    setExpression("");
     setInput("0");
-    setOperator(null);
     setTotal(false);
+  };
+
+  const toggleHistory = () => {
+    setShowHistory((prev) => !prev);
   };
 
   return (
     <>
       <div className="calculator">
         <h1 className="title">Calculator</h1>
-        <div className="calculator-container">
-          <div className="display">
-            {input !== "" ? (
-              <div>{formatNumber(input)}</div>
-            ) : (
-              <div>{formatNumber(preState)}</div>
-            )}
-          </div>
+        <div className="calculator-history">
+          <div className="calculator-container">
+            <div className="display">
+              {input !== "" ? (
+                <div>{formatNumber(input)}</div>
+              ) : (
+                <div>{formatNumber(expression)}</div>
+              )}
+            </div>
 
-          <div className="buttons">
-            <div className="top-row">
-              <Button className="operator-clear" onClick={resetSettings}>
-                C
-              </Button>
-              <Button onClick={operatorType} className="button">
-                {/* <FaDivide /> */} /
-              </Button>
-              <Button onClick={percentCalculate}>%</Button>
-              <Button onClick={minusPlus} className="operator">
-                +/-
-              </Button>
-            </div>
-            <div className="number-row">
-              <Button onClick={inputNumber}>7</Button>
-              <Button onClick={inputNumber}>8</Button>
-              <Button onClick={inputNumber}>9</Button>
-              <Button onClick={operatorType} className="operator">
-                *
-              </Button>
-            </div>
-            <div className="number-row">
-              <Button onClick={inputNumber}>4</Button>
-              <Button onClick={inputNumber}>5</Button>
-              <Button onClick={inputNumber}>6</Button>
-              <Button onClick={operatorType} className="operator">
-                {/* <FaMinus /> */} -
-              </Button>
-            </div>
-            <div className="number-row">
-              <Button onClick={inputNumber}>1</Button>
-              <Button onClick={inputNumber}>2</Button>
-              <Button onClick={inputNumber}>3</Button>
-              <Button onClick={operatorType} className="operator">
-                {/* <FaPlus /> */} +
-              </Button>
-            </div>
-            <div className="last-row">
-              <Button onClick={inputNumber} className="zero">
-                0
-              </Button>
-              <Button onClick={inputNumber}>.</Button>
-              <Button className="operator" onClick={calculation}>
-                =
-              </Button>
+            <div className="buttons">
+              <div className="top-row">
+                <Button className="operator-clear" onClick={resetSettings}>
+                  C
+                </Button>
+                <Button onClick={operatorType} className="button">
+                  /
+                </Button>
+                <Button onClick={percentCalculate}>%</Button>
+                <Button onClick={minusPlus} className="operator">
+                  +/-
+                </Button>
+              </div>
+              <div className="number-row">
+                <Button onClick={inputNumber}>7</Button>
+                <Button onClick={inputNumber}>8</Button>
+                <Button onClick={inputNumber}>9</Button>
+                <Button onClick={operatorType} className="operator">
+                  *
+                </Button>
+              </div>
+              <div className="number-row">
+                <Button onClick={inputNumber}>4</Button>
+                <Button onClick={inputNumber}>5</Button>
+                <Button onClick={inputNumber}>6</Button>
+                <Button onClick={operatorType} className="operator">
+                  -
+                </Button>
+              </div>
+              <div className="number-row">
+                <Button onClick={inputNumber}>1</Button>
+                <Button onClick={inputNumber}>2</Button>
+                <Button onClick={inputNumber}>3</Button>
+                <Button onClick={operatorType} className="operator">
+                  +
+                </Button>
+              </div>
+              <div className="last-row">
+                <Button onClick={inputNumber} className="zero">
+                  0
+                </Button>
+                <Button onClick={calculateSquare} className="operator">
+                  √
+                </Button>
+                <Button onClick={inputNumber}>.</Button>
+                <Button className="operator" onClick={calculation}>
+                  =
+                </Button>
+              </div>
             </div>
           </div>
+          <History
+            history={history}
+            showHistory={showHistory}
+            toggleHistory={toggleHistory}
+          />
         </div>
       </div>
     </>

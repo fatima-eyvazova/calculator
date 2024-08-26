@@ -30,10 +30,7 @@ button.operator:hover {
 }
 
 button.zero {
-  width: 120px;
-  height: 60px;
   border-radius: 30px;
   display: flex;
-  justify-content: flex-start;
   padding-left: 20px;
 }

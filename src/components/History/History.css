@@ -1,0 +1,27 @@
+.history-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.calculator-history {
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.history-buttons {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  padding: 30px;
+  border-radius: 20px;
+}
+
+.history-list {
+  list-style: none;
+}
