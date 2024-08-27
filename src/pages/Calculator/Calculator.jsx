@@ -123,16 +123,16 @@ const Calculator = () => {
   const minusPlus = () => {
     setExpression((prev) => {
       const operators = ["+", "-", "*", "/"];
-      let firstOperatorIndex = -1;
+      let lastOperatorIndex = -1;
 
-      for (let i = 0; i < prev.length; i++) {
+      for (let i = prev.length - 1; i >= 0; i--) {
         if (operators.includes(prev[i])) {
-          firstOperatorIndex = i;
+          lastOperatorIndex = i;
           break;
         }
       }
 
-      if (firstOperatorIndex === -1) {
+      if (lastOperatorIndex === -1) {
         if (prev[0] === "-") {
           return prev.slice(1);
         } else {
@@ -140,17 +140,18 @@ const Calculator = () => {
         }
       }
 
-      const operator = prev[firstOperatorIndex];
+      const operator = prev[lastOperatorIndex];
       if (operator === "+") {
         return (
-          prev.slice(0, firstOperatorIndex) +
+          prev.slice(0, lastOperatorIndex) +
           "-" +
-          prev.slice(firstOperatorIndex + 1)
+          prev.slice(lastOperatorIndex + 1)
         );
       } else if (operator === "-") {
         return (
-          prev.slice(0, firstOperatorIndex) +
-          +prev.slice(firstOperatorIndex + 1)
+          prev.slice(0, lastOperatorIndex) +
+          "+" +
+          prev.slice(lastOperatorIndex + 1)
         );
       }
 
@@ -159,10 +160,27 @@ const Calculator = () => {
   };
 
   const percentCalculate = () => {
-    const value = parseFloat(expression);
-    if (!isNaN(value)) {
-      setExpression(String(value / 100));
-    }
+    setExpression((prev) => {
+      const operators = ["+", "-", "*", "/"];
+      let lastOperatorIndex = -1;
+
+      for (let i = prev.length - 1; i >= 0; i--) {
+        if (operators.includes(prev[i])) {
+          lastOperatorIndex = i;
+          break;
+        }
+      }
+
+      if (lastOperatorIndex === -1) {
+        const value = parseFloat(prev);
+        return !isNaN(value) ? String(value / 100) : prev;
+      }
+
+      const lastNumber = prev.slice(lastOperatorIndex + 1);
+      const percentValue = parseFloat(lastNumber) / 100;
+
+      return prev.slice(0, lastOperatorIndex + 1) + percentValue;
+    });
   };
 
   const resetSettings = () => {
