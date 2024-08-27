@@ -237,12 +237,13 @@ const Calculator = () => {
                 <Button className="operator-clear" onClick={resetSettings}>
                   C
                 </Button>
-                <Button onClick={operatorType} className="button">
-                  /
-                </Button>
-                <Button onClick={percentCalculate}>%</Button>
                 <Button onClick={minusPlus} className="operator">
                   +/-
+                </Button>
+
+                <Button onClick={percentCalculate}>%</Button>
+                <Button onClick={operatorType} className="button">
+                  /
                 </Button>
               </div>
               <div className="number-row">
@@ -276,6 +277,7 @@ const Calculator = () => {
                 <Button onClick={calculateSquare} className="operator">
                   √
                 </Button>
+
                 <Button onClick={inputNumber}>.</Button>
                 <Button className="operator" onClick={calculation}>
                   =
