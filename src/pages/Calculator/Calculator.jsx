@@ -121,9 +121,41 @@ const Calculator = () => {
   };
 
   const minusPlus = () => {
-    setExpression((prev) =>
-      prev.charAt(0) === "-" ? prev.substring(1) : "-" + prev
-    );
+    setExpression((prev) => {
+      const operators = ["+", "-", "*", "/"];
+      let firstOperatorIndex = -1;
+
+      for (let i = 0; i < prev.length; i++) {
+        if (operators.includes(prev[i])) {
+          firstOperatorIndex = i;
+          break;
+        }
+      }
+
+      if (firstOperatorIndex === -1) {
+        if (prev[0] === "-") {
+          return prev.slice(1);
+        } else {
+          return "-" + prev;
+        }
+      }
+
+      const operator = prev[firstOperatorIndex];
+      if (operator === "+") {
+        return (
+          prev.slice(0, firstOperatorIndex) +
+          "-" +
+          prev.slice(firstOperatorIndex + 1)
+        );
+      } else if (operator === "-") {
+        return (
+          prev.slice(0, firstOperatorIndex) +
+          +prev.slice(firstOperatorIndex + 1)
+        );
+      }
+
+      return prev;
+    });
   };
 
   const percentCalculate = () => {
