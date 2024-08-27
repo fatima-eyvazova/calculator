@@ -29,6 +29,8 @@ body {
 }
 
 .display {
+  overflow-x: hidden;
+  overflow-y: hidden;
   background-color: #333;
   color: #fff;
   padding: 20px;

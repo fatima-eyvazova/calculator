@@ -12,7 +12,7 @@ const Calculator = () => {
 
   const formatNumber = (value) => {
     if (isNaN(value) || value === "") return value;
-    return Number(value).toString();
+    return value;
   };
 
   const inputNumber = (e) => {
@@ -46,10 +46,20 @@ const Calculator = () => {
 
     if (expression === "" && value === "-") {
       setExpression("-");
+      setInput("-");
       return;
     }
 
-    if (expression === "" && value !== "-" && value !== ".") return;
+    if (
+      expression === "" ||
+      ["+", "-", "*", "/"].includes(expression.slice(-1))
+    ) {
+      if (value === "-" && expression === "") {
+        setExpression("-");
+        setInput("-");
+      }
+      return;
+    }
 
     if (["+", "-", "*", "/"].includes(expression.slice(-1))) {
       setExpression(expression.slice(0, -1) + value);
@@ -68,13 +78,16 @@ const Calculator = () => {
         throw new Error("Invalid expression");
       }
 
+      if (typeof result === "number") {
+        result = parseFloat(result.toFixed(10));
+      }
+
       setInput(result);
       setExpression(result);
       setHistory((prev) => [...prev, `${expression} = ${result}`]);
       setTotal(true);
     } catch (error) {
       setInput("Error");
-      setExpression("");
     }
   };
 
@@ -141,6 +154,18 @@ const Calculator = () => {
       }
 
       const operator = prev[lastOperatorIndex];
+      const lastNumber = prev.slice(lastOperatorIndex + 1);
+
+      if (operator === "*" || operator === "/") {
+        if (lastNumber[0] === "-") {
+          return (
+            prev.slice(0, lastOperatorIndex + 1) + `(${lastNumber.slice(1)})`
+          );
+        } else {
+          return prev.slice(0, lastOperatorIndex + 1) + `(-${lastNumber})`;
+        }
+      }
+
       if (operator === "+") {
         return (
           prev.slice(0, lastOperatorIndex) +
