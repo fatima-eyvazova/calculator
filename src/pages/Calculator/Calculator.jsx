@@ -16,12 +16,23 @@ const Calculator = () => {
   };
 
   const inputNumber = (e) => {
+    const value = e.target.innerText;
+
     if (total) {
-      setExpression(e.target.innerText);
+      setExpression(value === "." ? "0." : value);
       setTotal(false);
     } else {
-      const value = e.target.innerText;
-      setExpression((prev) => prev + value);
+      if (value === ".") {
+        const lastChar = expression.slice(-1);
+
+        if (lastChar === "" || ["+", "-", "*", "/"].includes(lastChar)) {
+          setExpression((prev) => prev + "0.");
+        } else {
+          setExpression((prev) => prev + value);
+        }
+      } else {
+        setExpression((prev) => prev + value);
+      }
     }
   };
 
@@ -51,12 +62,14 @@ const Calculator = () => {
 
   const calculation = () => {
     try {
-      const result = evaluateExpression(expression);
+      let result = evaluateExpression(expression);
+
       if (result === "Error") {
         throw new Error("Invalid expression");
       }
+
       setInput(result);
-      setExpression(result.toString());
+      setExpression(result);
       setHistory((prev) => [...prev, `${expression} = ${result}`]);
       setTotal(true);
     } catch (error) {
@@ -140,7 +153,7 @@ const Calculator = () => {
               {input !== "" ? (
                 <div>{formatNumber(input)}</div>
               ) : (
-                <div>{formatNumber(expression)}</div>
+                <div>{formatNumber(expression.slice(0, 2))}</div>
               )}
             </div>
 
