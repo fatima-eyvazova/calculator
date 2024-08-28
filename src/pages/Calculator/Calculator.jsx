@@ -93,39 +93,88 @@ const Calculator = () => {
 
   const evaluateExpression = (expr) => {
     try {
-      if (expr.includes("/0")) {
-        throw new Error("Division by zero error");
-      }
-
       let updatedExpr = expr;
-      while (updatedExpr.includes("√")) {
-        const sqrtIndex = updatedExpr.indexOf("√");
-        let number = "";
-        let i = sqrtIndex + 1;
 
-        while (
-          i < updatedExpr.length &&
-          !isNaN(updatedExpr[i]) &&
-          updatedExpr[i] !== " " &&
-          updatedExpr[i] !== "+" &&
-          updatedExpr[i] !== "-" &&
-          updatedExpr[i] !== "*" &&
-          updatedExpr[i] !== "/"
-        ) {
-          number += updatedExpr[i];
-          i++;
+      updatedExpr = processSquareRoots(updatedExpr);
+
+      let result = 0;
+      let currentNumber = "";
+      let currentOperator = "+";
+      let i = 0;
+
+      while (i < updatedExpr.length) {
+        const char = updatedExpr[i];
+
+        if (char === "+" || char === "-" || char === "*" || char === "/") {
+          if (currentNumber) {
+            result = applyOperation(
+              result,
+              parseFloat(currentNumber),
+              currentOperator
+            );
+            currentNumber = "";
+          }
+          currentOperator = char;
+        } else if (!isNaN(char) || char === ".") {
+          currentNumber += char;
+        } else {
+          throw new Error("Invalid character");
         }
 
-        const sqrtResult = Math.sqrt(parseFloat(number));
-        updatedExpr =
-          updatedExpr.slice(0, sqrtIndex) +
-          sqrtResult +
-          updatedExpr.slice(sqrtIndex + number.length + 1);
+        i++;
       }
 
-      return Function(`return ${updatedExpr}`)();
+      if (currentNumber) {
+        result = applyOperation(
+          result,
+          parseFloat(currentNumber),
+          currentOperator
+        );
+      }
+
+      return result;
     } catch (error) {
       return "Error";
+    }
+  };
+
+  const processSquareRoots = (expr) => {
+    let updatedExpr = "";
+    let i = 0;
+    while (i < expr.length) {
+      if (expr[i] === "√") {
+        let j = i + 1;
+        let number = "";
+        while ((j < expr.length && !isNaN(expr[j])) || expr[j] === ".") {
+          number += expr[j];
+          j++;
+        }
+        const sqrtResult = Math.sqrt(parseFloat(number));
+        updatedExpr += sqrtResult;
+        i = j;
+      } else {
+        updatedExpr += expr[i];
+        i++;
+      }
+    }
+    return updatedExpr;
+  };
+
+  const applyOperation = (a, b, operator) => {
+    switch (operator) {
+      case "+":
+        return a + b;
+      case "-":
+        return a - b;
+      case "*":
+        return a * b;
+      case "/":
+        if (b === 0) {
+          throw new Error("Division by zero error");
+        }
+        return a / b;
+      default:
+        throw new Error("Unsupported operator");
     }
   };
 
@@ -285,11 +334,7 @@ const Calculator = () => {
               </div>
             </div>
           </div>
-          <History
-            history={history}
-            showHistory={showHistory}
-            toggleHistory={toggleHistory}
-          />
+          <History history={history} />
         </div>
       </div>
     </>

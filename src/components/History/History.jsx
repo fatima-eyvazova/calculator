@@ -1,7 +1,7 @@
 import Button from "../../components/Button/Button";
 import "../History/History.css";
 
-const History = ({ history, showHistory, toggleHistory }) => {
+const History = ({ history }) => {
   return (
     <>
       <div className="history-container">
@@ -9,20 +9,13 @@ const History = ({ history, showHistory, toggleHistory }) => {
           <h1>History</h1>
         </div>
         <div className="history-buttons">
-          <Button onClick={toggleHistory} className="history-button">
-            H
-          </Button>
-          {showHistory && (
-            <div className="history">
-              <ul className="history-list">
-                {history.length === 0 ? (
-                  <li>No operation</li>
-                ) : (
-                  history.map((entry, index) => <li key={index}>{entry}</li>)
-                )}
-              </ul>
-            </div>
-          )}
+          <ul className="history-list">
+            {history.length === 0 ? (
+              <li>No operation</li>
+            ) : (
+              history.map((item, index) => <li key={index}>{item}</li>)
+            )}
+          </ul>
         </div>
       </div>
     </>
