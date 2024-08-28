@@ -263,10 +263,6 @@ const Calculator = () => {
     setTotal(false);
   };
 
-  const toggleHistory = () => {
-    setShowHistory((prev) => !prev);
-  };
-
   return (
     <>
       <div className="calculator">
