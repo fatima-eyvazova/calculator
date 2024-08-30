@@ -2,338 +2,150 @@ import Button from "../../components/Button/Button";
 import "../Calculator/Calculator.css";
 import { useEffect, useState } from "react";
 import History from "../../components/History/History";
+import {
+  inputNumber,
+  operatorType,
+  calculation,
+  calculateSquare,
+  percentCalculate,
+  deleteLastCharacter,
+  resetSettings,
+  formatNumber,
+} from "../../components/CalculatorLogic/CalculatorLogic";
 
 const Calculator = () => {
   const [expression, setExpression] = useState("");
   const [input, setInput] = useState("0");
   const [total, setTotal] = useState(false);
   const [history, setHistory] = useState([]);
-  const [showHistory, setShowHistory] = useState(false);
-
-  const formatNumber = (value) => {
-    if (isNaN(value) || value === "") return value;
-    return value;
-  };
-
-  const inputNumber = (e) => {
-    const value = e.target.innerText;
-
-    if (total) {
-      setExpression(value === "." ? "0." : value);
-      setTotal(false);
-    } else {
-      if (value === ".") {
-        const lastChar = expression.slice(-1);
-
-        if (lastChar === "" || ["+", "-", "*", "/"].includes(lastChar)) {
-          setExpression((prev) => prev + "0.");
-        } else {
-          setExpression((prev) => prev + value);
-        }
-      } else {
-        setExpression((prev) => prev + value);
-      }
-    }
-  };
 
   useEffect(() => {
     setInput(expression || "0");
   }, [expression]);
 
-  const operatorType = (e) => {
-    e.stopPropagation();
-    const value = e.target.innerText;
-
-    if (expression === "" && value === "-") {
-      setExpression("-");
-      setInput("-");
-      return;
-    }
-
-    if (
-      expression === "" ||
-      ["+", "-", "*", "/"].includes(expression.slice(-1))
-    ) {
-      if (value === "-" && expression === "") {
-        setExpression("-");
-        setInput("-");
-      }
-      return;
-    }
-
-    if (["+", "-", "*", "/"].includes(expression.slice(-1))) {
-      setExpression(expression.slice(0, -1) + value);
-    } else {
-      setExpression((prev) => prev + value);
-    }
-
-    setInput(expression + value);
-  };
-
-  const calculation = () => {
-    try {
-      let result = evaluateExpression(expression);
-
-      if (result === "Error") {
-        throw new Error("Invalid expression");
-      }
-
-      if (typeof result === "number") {
-        result = parseFloat(result.toFixed(10));
-      }
-
-      setInput(result);
-      setExpression(result);
-      setHistory((prev) => [...prev, `${expression} = ${result}`]);
-      setTotal(true);
-    } catch (error) {
-      setInput("Error");
-    }
-  };
-
-  const evaluateExpression = (expr) => {
-    try {
-      let updatedExpr = expr;
-
-      updatedExpr = processSquareRoots(updatedExpr);
-
-      let result = 0;
-      let currentNumber = "";
-      let currentOperator = "+";
-      let i = 0;
-
-      while (i < updatedExpr.length) {
-        const char = updatedExpr[i];
-
-        if (char === "+" || char === "-" || char === "*" || char === "/") {
-          if (currentNumber) {
-            result = applyOperation(
-              result,
-              parseFloat(currentNumber),
-              currentOperator
-            );
-            currentNumber = "";
-          }
-          currentOperator = char;
-        } else if (!isNaN(char) || char === ".") {
-          currentNumber += char;
-        } else {
-          throw new Error("Invalid character");
-        }
-
-        i++;
-      }
-
-      if (currentNumber) {
-        result = applyOperation(
-          result,
-          parseFloat(currentNumber),
-          currentOperator
-        );
-      }
-
-      return result;
-    } catch (error) {
-      return "Error";
-    }
-  };
-
-  const processSquareRoots = (expr) => {
-    let updatedExpr = "";
-    let i = 0;
-    while (i < expr.length) {
-      if (expr[i] === "√") {
-        let j = i + 1;
-        let number = "";
-        while ((j < expr.length && !isNaN(expr[j])) || expr[j] === ".") {
-          number += expr[j];
-          j++;
-        }
-        const sqrtResult = Math.sqrt(parseFloat(number));
-        updatedExpr += sqrtResult;
-        i = j;
-      } else {
-        updatedExpr += expr[i];
-        i++;
-      }
-    }
-    return updatedExpr;
-  };
-
-  const applyOperation = (a, b, operator) => {
-    switch (operator) {
-      case "+":
-        return a + b;
-      case "-":
-        return a - b;
-      case "*":
-        return a * b;
-      case "/":
-        if (b === 0) {
-          throw new Error("Division by zero error");
-        }
-        return a / b;
-      default:
-        throw new Error("Unsupported operator");
-    }
-  };
-
-  const calculateSquare = () => {
-    setExpression((prev) => prev + "√");
-  };
-
-  const minusPlus = () => {
-    setExpression((prev) => {
-      const operators = ["+", "-", "*", "/"];
-      let lastOperatorIndex = -1;
-
-      for (let i = prev.length - 1; i >= 0; i--) {
-        if (operators.includes(prev[i])) {
-          lastOperatorIndex = i;
-          break;
-        }
-      }
-
-      if (lastOperatorIndex === -1) {
-        if (prev[0] === "-") {
-          return prev.slice(1);
-        } else {
-          return "-" + prev;
-        }
-      }
-
-      const operator = prev[lastOperatorIndex];
-      const lastNumber = prev.slice(lastOperatorIndex + 1);
-
-      if (operator === "*" || operator === "/") {
-        if (lastNumber[0] === "-") {
-          return (
-            prev.slice(0, lastOperatorIndex + 1) + `(${lastNumber.slice(1)})`
-          );
-        } else {
-          return prev.slice(0, lastOperatorIndex + 1) + `(-${lastNumber})`;
-        }
-      }
-
-      if (operator === "+") {
-        return (
-          prev.slice(0, lastOperatorIndex) +
-          "-" +
-          prev.slice(lastOperatorIndex + 1)
-        );
-      } else if (operator === "-") {
-        return (
-          prev.slice(0, lastOperatorIndex) +
-          "+" +
-          prev.slice(lastOperatorIndex + 1)
-        );
-      }
-
-      return prev;
-    });
-  };
-
-  const percentCalculate = () => {
-    setExpression((prev) => {
-      const operators = ["+", "-", "*", "/"];
-      let lastOperatorIndex = -1;
-
-      for (let i = prev.length - 1; i >= 0; i--) {
-        if (operators.includes(prev[i])) {
-          lastOperatorIndex = i;
-          break;
-        }
-      }
-
-      if (lastOperatorIndex === -1) {
-        const value = parseFloat(prev);
-        return !isNaN(value) ? String(value / 100) : prev;
-      }
-
-      const lastNumber = prev.slice(lastOperatorIndex + 1);
-      const percentValue = parseFloat(lastNumber) / 100;
-
-      return prev.slice(0, lastOperatorIndex + 1) + percentValue;
-    });
-  };
-
-  const resetSettings = () => {
-    setExpression("");
-    setInput("0");
-    setTotal(false);
-  };
+  const buttonConfig = [
+    {
+      label: "C",
+      onClick: resetSettings(setExpression, setInput, setTotal),
+      className: "operator-clear",
+    },
+    {
+      label: "⌫",
+      onClick: deleteLastCharacter(setExpression),
+      className: "operator",
+    },
+    { label: "%", onClick: percentCalculate(setExpression) },
+    {
+      label: "/",
+      onClick: operatorType(expression, setExpression, setInput),
+      className: "button",
+    },
+    {
+      label: "7",
+      onClick: inputNumber(expression, setExpression, total, setTotal),
+    },
+    {
+      label: "8",
+      onClick: inputNumber(expression, setExpression, total, setTotal),
+    },
+    {
+      label: "9",
+      onClick: inputNumber(expression, setExpression, total, setTotal),
+    },
+    {
+      label: "*",
+      onClick: operatorType(expression, setExpression, setInput),
+      className: "operator",
+    },
+    {
+      label: "4",
+      onClick: inputNumber(expression, setExpression, total, setTotal),
+    },
+    {
+      label: "5",
+      onClick: inputNumber(expression, setExpression, total, setTotal),
+    },
+    {
+      label: "6",
+      onClick: inputNumber(expression, setExpression, total, setTotal),
+    },
+    {
+      label: "-",
+      onClick: operatorType(expression, setExpression, setInput),
+      className: "operator",
+    },
+    {
+      label: "1",
+      onClick: inputNumber(expression, setExpression, total, setTotal),
+    },
+    {
+      label: "2",
+      onClick: inputNumber(expression, setExpression, total, setTotal),
+    },
+    {
+      label: "3",
+      onClick: inputNumber(expression, setExpression, total, setTotal),
+    },
+    {
+      label: "+",
+      onClick: operatorType(expression, setExpression, setInput),
+      className: "operator",
+    },
+    {
+      label: "0",
+      onClick: inputNumber(expression, setExpression, total, setTotal),
+      className: "zero",
+    },
+    {
+      label: "√",
+      onClick: calculateSquare(setExpression),
+      className: "operator",
+    },
+    {
+      label: ".",
+      onClick: inputNumber(expression, setExpression, total, setTotal),
+    },
+    {
+      label: "=",
+      onClick: calculation(
+        expression,
+        setExpression,
+        setInput,
+        setTotal,
+        setHistory
+      ),
+      className: "operator",
+    },
+  ];
 
   return (
-    <>
-      <div className="calculator">
-        <h1 className="title">Calculator</h1>
-        <div className="calculator-history">
-          <div className="calculator-container">
-            <div className="display">
-              {input !== "" ? (
-                <div>{formatNumber(input)}</div>
-              ) : (
-                <div>{formatNumber(expression.slice(0, 2))}</div>
-              )}
-            </div>
-
-            <div className="buttons">
-              <div className="top-row">
-                <Button className="operator-clear" onClick={resetSettings}>
-                  C
-                </Button>
-                <Button onClick={minusPlus} className="operator">
-                  +/-
-                </Button>
-
-                <Button onClick={percentCalculate}>%</Button>
-                <Button onClick={operatorType} className="button">
-                  /
-                </Button>
-              </div>
-              <div className="number-row">
-                <Button onClick={inputNumber}>7</Button>
-                <Button onClick={inputNumber}>8</Button>
-                <Button onClick={inputNumber}>9</Button>
-                <Button onClick={operatorType} className="operator">
-                  *
-                </Button>
-              </div>
-              <div className="number-row">
-                <Button onClick={inputNumber}>4</Button>
-                <Button onClick={inputNumber}>5</Button>
-                <Button onClick={inputNumber}>6</Button>
-                <Button onClick={operatorType} className="operator">
-                  -
-                </Button>
-              </div>
-              <div className="number-row">
-                <Button onClick={inputNumber}>1</Button>
-                <Button onClick={inputNumber}>2</Button>
-                <Button onClick={inputNumber}>3</Button>
-                <Button onClick={operatorType} className="operator">
-                  +
-                </Button>
-              </div>
-              <div className="last-row">
-                <Button onClick={inputNumber} className="zero">
-                  0
-                </Button>
-                <Button onClick={calculateSquare} className="operator">
-                  √
-                </Button>
-
-                <Button onClick={inputNumber}>.</Button>
-                <Button className="operator" onClick={calculation}>
-                  =
-                </Button>
-              </div>
-            </div>
+    <div className="calculator">
+      <h1 className="title">Calculator</h1>
+      <div className="calculator-history">
+        <div className="calculator-container">
+          <div className="display">
+            {input !== "" ? (
+              <div>{formatNumber(input)}</div>
+            ) : (
+              <div>{formatNumber(expression.slice(0, 2))}</div>
+            )}
           </div>
-          <History history={history} />
+
+          <div className="buttons">
+            {buttonConfig.map((button, index) => (
+              <Button
+                key={index}
+                onClick={button.onClick}
+                className={button.className}
+              >
+                {button.label}
+              </Button>
+            ))}
+          </div>
         </div>
+        <History history={history} />
       </div>
-    </>
+    </div>
   );
 };
 
